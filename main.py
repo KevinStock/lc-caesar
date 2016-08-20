@@ -16,10 +16,50 @@
 #
 import webapp2
 from caesar import encrypt
+import cgi
+
+# html_head = """
+#     <!DOCTYPE html>
+#     <html>
+#         <head>
+#             <title>Caesar</title>
+#         </head>
+#         <body>
+# """
+
+form = """
+    <form method="post">
+        <label>
+            <strong>Enter some text to ROT13:</strong>
+            <br />
+            <textarea autofocus required rows="10" cols="80" name="rot_textarea">%(rot_text)s</textarea>
+        </label>
+        <br />
+        <input type="submit" />
+    </form>
+"""
+
+# html_close = """
+#         </body>
+#     </html>
+# """
+
+def escape_html(s):
+    return cgi.escape(s, quote = True)
+
 
 class MainHandler(webapp2.RequestHandler):
+    
+    def write_form(self, rot_text=""):
+        self.response.out.write(form % {"rot_text": escape_html(rot_text)})
+    
     def get(self):
-        self.response.write('Hello world!')
+        self.write_form()
+
+    def post(self):
+        rot_text = self.request.get("rot_textarea")
+        self.write_form(encrypt(rot_text, 13))
+    
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
